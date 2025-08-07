@@ -1,11 +1,16 @@
 
 
 document.addEventListener('DOMContentLoaded', () => {
+
+    const baseUrl = 'http://localhost:3000';
+    const loginEndpoint = `${baseUrl}/api/auth/login`;
+    const telemetryEndpoint = `${baseUrl}/api/telemetry`;
+
     document.querySelector('#login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
             document.querySelector('#login-response').textContent = 'Looading...';
-            const response = await fetch('http://localhost:3000/api/auth/login', {
+            const response = await fetch(loginEndpoint, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -31,7 +36,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const iotDeviceId = document.querySelector('#iot-device-id').value;
             document.querySelector('#telemetry-response').textContent = 'Looading...';
-            const response = await fetch(`http://localhost:3000/api/telemetry/${iotDeviceId}`);
+            const response = await fetch(`${telemetryEndpoint}/${iotDeviceId}`);
             if (response.ok) {
                 const data = await response.json();
                 document.querySelector('#telemetry-response').textContent = `${JSON.stringify(data, null, 2)}`;
