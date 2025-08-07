@@ -8,6 +8,9 @@ export interface IoTDevice {
   getJWTToken(): Promise<string>;
 }
 
+const baseUrl = 'http://localhost:3000';
+const loginEndpoint = `${baseUrl}/api/auth/login`;
+
 export class IoTDeviceImp implements IoTDevice {
   deviceId: string;
   user: string;
@@ -20,12 +23,12 @@ export class IoTDeviceImp implements IoTDevice {
   }
 
   async getJWTToken(): Promise<string> {
-    const response = await fetch("http://localhost:3000/api/auth", {
+    const response = await fetch(loginEndpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ user: this.user, password: this.password }),
+      body: JSON.stringify({ username: this.user, password: this.password }),
     });
     if (!response.ok) {
       throw new Error(`Failed to get JWT token: ${response.statusText}`);
@@ -51,35 +54,61 @@ export class IoTDeviceImp implements IoTDevice {
       battery: mockBattery,
       datetime: new Date().toISOString(),
     };
-    // Get JWT token from backend
-    const jwtToken = await this.getJWTToken();
-    // Send telemetry data Event Grid
-    const mqttClient = mqtt.connect(
-      "demos-event-grid.northeurope-1.ts.eventgrid.azure.net",
-      {
-        protocolVersion: 5,
-        properties: {
-          authenticationMethod: 'CUSTOM-JWT',
-          authenticationData: Buffer.from(jwtToken),
-        },
-        clientId: 'your-client-id',
-        clean: true,
-      }
-    );
-    const topic = "demo-topic";
-    const message = JSON.stringify(mockTelemetryData);
+    
+    try {
+      // Get JWT token from backend
+      const jwtToken = await this.getJWTToken();
+      
+      // Send telemetry data Event Grid
+      return new Promise((resolve, reject) => {
+        const mqttClient = mqtt.connect(
+          "mqtts://demos-event-grid.northeurope-1.ts.eventgrid.azure.net:8883",
+          {
+            protocolVersion: 5,
+            properties: {
+              authenticationMethod: 'CUSTOM-JWT',
+              authenticationData: Buffer.from(jwtToken),
+            },
+            clientId: 'localhost',
+            clean: true,
+            connectTimeout: 30000, // 30 seconds timeout
+            reconnectPeriod: 0, // Disable automatic reconnection
+          }
+        );
+        
+        const topic = "demo-topic";
+        const message = JSON.stringify(mockTelemetryData);
 
-    mqttClient.on('connect', () => {
-      if (mqttClient.connected === true) {
-        console.log(`${this.deviceId} ${mockTelemetryData}`);
-        // publish message        
-        mqttClient.publish(topic, message);
-      }
-    });
+        mqttClient.on('connect', () => {
+          // console.log(`Connected to Event Grid for device ${this.deviceId}`);
+          // console.log(`Sending telemetry: ${message}`);
+          
+          // Publish message        
+          mqttClient.publish(topic, message, (err) => {
+            if (err) {
+              // console.error('Failed to publish message:', err);
+              reject(err);
+            } else {
+              console.log(`${this.deviceId} ${message}`);
+              resolve();
+            }
+            mqttClient.end(); // Close connection after publishing
+          });
+        });
 
-    mqttClient.on('error', (error) => {
-      console.error(error);
-      process.exit(1);
-    });
+        mqttClient.on('error', (error) => {
+          // console.error(`MQTT connection error for device ${this.deviceId}:`, error);
+          mqttClient.end();
+          reject(error);
+        });
+
+        mqttClient.on('close', () => {
+          // console.log(`MQTT connection closed for device ${this.deviceId}`);
+        });
+      });
+    } catch (error) {
+      console.error(`Failed to send telemetry for device ${this.deviceId}:`, error);
+      throw error;
+    }
   }
 }

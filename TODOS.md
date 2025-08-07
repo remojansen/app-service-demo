@@ -1,9 +1,10 @@
 # TODOs
 
-[] Backend HTTP POST /auth/login
-[] Demo app login
-[] Device login
-[] Device publish
-[] Backend get telemetry (header JWT)
-[] Demo app get telemery
+- [x] Backend HTTP POST /auth/login
+- [x] Demo app login
+- [x] Device login
+- [x] Device publish
+- [ ] Backend SSE
+- [ ] Backend get telemetry (header JWT)
+- [ ] Demo app get telemery
 

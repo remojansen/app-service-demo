@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('#login-form').addEventListener('submit', async (e) => {
         e.preventDefault();
         try {
-            document.querySelector('#login-response').textContent = 'Looading...';
+            document.querySelector('#login-response').textContent = 'Loading...';
             const response = await fetch(loginEndpoint, {
                 method: 'POST',
                 headers: {
@@ -35,7 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         try {
             const iotDeviceId = document.querySelector('#iot-device-id').value;
-            document.querySelector('#telemetry-response').textContent = 'Looading...';
+            document.querySelector('#telemetry-response').textContent = 'Loading...';
             const response = await fetch(`${telemetryEndpoint}/${iotDeviceId}`);
             if (response.ok) {
                 const data = await response.json();

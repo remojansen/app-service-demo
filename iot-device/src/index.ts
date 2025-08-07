@@ -1,4 +1,4 @@
-import { IoTDeviceImp } from './device';
+import { IoTDeviceImp } from './device.js';
 
 const devices: IoTDeviceImp[] = [
     new IoTDeviceImp("e1c5c53e-21a9-4765-ae55-db6ab06522f6", "user1@contoso.com", "password1"),
@@ -7,6 +7,8 @@ const devices: IoTDeviceImp[] = [
     new IoTDeviceImp("7e435e48-4aab-4c09-a9a2-cf4b6e63707e", "user4@contoso.com", "password4"),
     new IoTDeviceImp("1c9326e1-3d90-4315-b13a-6199dea4f513", "user5@contoso.com", "password5"),
 ];
+
+const tenSeconds = 10000;
 
 setInterval(async () => {
     (async () => {
@@ -18,4 +20,4 @@ setInterval(async () => {
             console.error("Error sending telemetry:", error);
         }
     })();
-}, 10000);
+}, tenSeconds);

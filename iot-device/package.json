@@ -5,13 +5,14 @@
   "description": "In this folder you will find a simulation of an IoT device that sends some updates to a device twin in Azure IoT Hub.",
   "main": "index.js",
   "scripts": {
-    "start": "ts-node ./src/index.ts"
+    "start": "tsc -p ./tsconfig.json && node ./dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "MIT",
   "dependencies": {
     "mqtt": "^5.14.0",
-    "ts-node": "^10.9.2"
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
   }
 }
