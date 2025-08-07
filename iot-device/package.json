@@ -1,0 +1,17 @@
+{
+  "name": "iot-device",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "In this folder you will find a simulation of an IoT device that sends some updates to a device twin in Azure IoT Hub.",
+  "main": "index.js",
+  "scripts": {
+    "start": "ts-node ./src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "mqtt": "^5.14.0",
+    "ts-node": "^10.9.2"
+  }
+}

@@ -1,0 +1,53 @@
+# Node modules
+node_modules
+npm-debug.log*
+
+# TypeScript build output
+dist
+
+# Test files and coverage
+test
+coverage
+*.spec.ts
+*.test.ts
+
+# Development files
+.env.local
+.env.development
+.env.test
+
+# IDE and editor files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+README.md
+*.md
+
+# Logs
+logs
+*.log
+
+# Temporary files
+.tmp
+.temp
+
+# ESLint and Prettier
+.eslintrc.js
+.prettierrc
+eslint.config.mjs
