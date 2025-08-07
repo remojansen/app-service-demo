@@ -75,8 +75,8 @@ export class IoTDeviceImp implements IoTDevice {
             reconnectPeriod: 0, // Disable automatic reconnection
           }
         );
-        
-        const topic = "demo-topic";
+
+        const topic = `devices/${this.deviceId}/telemetry`;
         const message = JSON.stringify(mockTelemetryData);
 
         mqttClient.on('connect', () => {

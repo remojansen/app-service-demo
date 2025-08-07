@@ -28,8 +28,9 @@ export async function signJwt() {
     // Fallback to original method if format is different
     privateKeyOnly = privateKeyPem.split("-----END PRIVATE KEY-----")[0] + "-----END PRIVATE KEY-----";
   }
-  const publicKeyOnly = privateKeyPem.split("-----END PRIVATE KEY-----")[1];
-  console.log(publicKeyOnly);
+  // Debug with https://www.jwt.io/
+  // const publicKeyOnly = privateKeyPem.split("-----END PRIVATE KEY-----")[1];
+  // console.log(publicKeyOnly);
   const payload = {
     iss: "CN=localhost",
     aud: "demos-event-grid.northeurope-1.ts.eventgrid.azure.net",
