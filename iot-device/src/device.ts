@@ -8,7 +8,7 @@ export interface IoTDevice {
   getJWTToken(): Promise<string>;
 }
 
-const baseUrl = 'http://localhost:3000';
+const baseUrl = 'https://iot-api-demo-hjggd9fufccvd0hu.northeurope-01.azurewebsites.net';
 const loginEndpoint = `${baseUrl}/api/auth/login`;
 
 export class IoTDeviceImp implements IoTDevice {
