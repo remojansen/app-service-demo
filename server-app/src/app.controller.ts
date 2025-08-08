@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Sse, Query } from '@nestjs/common';
 import { signJwt } from './auth';
 import { Observable } from 'rxjs';
-import mqtt from "mqtt";
+import { MqttSubscription } from './mqtt';
 
 interface LoginRequest {
   username: string;
@@ -29,6 +29,12 @@ export class AppController {
     return "Hello world!";
   }
 
+  @Get('api/mqtt/status')
+  getMqttStatus() {
+    const mqttSubscription = MqttSubscription.getInstance();
+    return mqttSubscription.getConnectionStatus();
+  }
+
   @Post('api/auth/login')
   async login(@Body() data: LoginRequest): Promise<LoginResponse> {
     // Fake user validation
@@ -46,67 +52,34 @@ export class AppController {
     @Param('deviceId') deviceId: string,
     @Query('jwt') jwt: string
   ): Observable<MessageEvent<TelemetryResponse>> {
-    return new Observable((subscriber) => {
+    return new Observable<MessageEvent<TelemetryResponse>>((subscriber) => {
       const topic = `devices/${deviceId}/telemetry`;
-
-      // console.log(`Connecting to MQTT broker with JWT: ${jwt}`);
-
-      const mqttClient = mqtt.connect(
-        "mqtts://demos-event-grid.northeurope-1.ts.eventgrid.azure.net:8883",
-        {
-          protocolVersion: 5,
-          properties: {
-            authenticationMethod: 'CUSTOM-JWT',
-            authenticationData: Buffer.from(jwt),
-          },
-          clientId: 'localhost',
-          clean: true,
-          connectTimeout: 30000, // 30 seconds timeout
-          reconnectPeriod: 0, // Disable automatic reconnection
-        }
-      );
-
-      // console.log(`Subscribing to topic: ${topic}`);
-
-      mqttClient.on('connect', () => {
-        // console.log("Connected to MQTT broker");
-        mqttClient.subscribe(topic, { qos: 1 } , (err) => {
-          if (err) {
-            console.error("Subscription error:", err);
-            subscriber.error(err);
-          } else {
-            // console.log(`Subscribed to topic: ${topic}`);
-          }
-        });
-      });
-
-      mqttClient.on('message', (topic, payload) => {
-        try {
-          const message = JSON.parse(payload.toString());
-          console.log(`Received message on topic ${topic}:`, message);
-          subscriber.next(message);
-        } catch (err) {
-          console.error("Failed to parse message:", err);
-          subscriber.error(err);
-        }
-      });
-
-      mqttClient.on('error', (error) => {
-        console.error("MQTT error:", error);
+      
+      // Get the singleton instance
+      const mqttSubscription = MqttSubscription.getInstance();
+      
+      // Subscribe and get cleanup function
+      let cleanup: (() => void) | null = null;
+      
+      mqttSubscription.subscribe(topic, jwt, (data: TelemetryResponse) => {
+        console.log(`SUB ${deviceId}:`, data);
+        subscriber.next({
+          data
+        } as MessageEvent<TelemetryResponse>);
+      }).then((cleanupFn) => {
+        cleanup = cleanupFn;
+      }).catch((error) => {
+        console.error(`Failed to subscribe to topic ${topic}:`, error);
         subscriber.error(error);
-        mqttClient.end();
       });
 
-      mqttClient.on('close', () => {
-        console.log("MQTT connection closed");
-        subscriber.complete();
-      });
-
-      // Cleanup logic when unsubscribed
+      // Return cleanup function for when SSE client disconnects
       return () => {
-        mqttClient.end();
+        console.log(`SSE client disconnected for device ${deviceId}`);
+        if (cleanup) {
+          cleanup();
+        }
       };
-
     });
   }
 

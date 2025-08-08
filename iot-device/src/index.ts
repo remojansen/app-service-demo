@@ -10,14 +10,43 @@ const devices: IoTDeviceImp[] = [
 
 const tenSeconds = 10000;
 
-setInterval(async () => {
-    (async () => {
-        try {
-            for (const device of devices) {
-                await device.sendTelemetry();
-            }
-        } catch (error) {
-            console.error("Error sending telemetry:", error);
+function generateMockTelemetryData(deviceId: string) {
+    const mockTemperature = Math.floor(Math.random() * 100);
+    const mockLatitude = (Math.random() * 180 - 90).toFixed(6);
+    const mockLongitude = (Math.random() * 360 - 180).toFixed(6);
+    const mockBattery = Math.floor(Math.random() * 100);
+    const mockTelemetryData = {
+        deviceId: deviceId,
+        temperature: mockTemperature,
+        latitude: mockLatitude,
+        longitude: mockLongitude,
+        battery: mockBattery,
+        datetime: new Date().toISOString(),
+    };
+    return mockTelemetryData;
+}
+
+(async () => {
+    const readyDevices = await Promise.all(devices.map(device => {
+        return device.initialize().then(() => {
+            console.log(`Device ${device.deviceId} initialized successfully.`);
+            return device;
+        }).catch(error => {
+            console.error(`Failed to initialize device ${device.deviceId}:`, error);
+            throw error;
+        });
+    }));
+    try {
+        for (const device of readyDevices) {
+            const topic = `devices/${device.deviceId}/telemetry`;
+            setInterval(() => {
+                const message = JSON.stringify(generateMockTelemetryData(device.deviceId));
+                if (device.publish) {
+                    device.publish(topic, message);
+                }
+            }, tenSeconds);
         }
-    })();
-}, tenSeconds);
+    } catch (error) {
+        console.error("Error sending telemetry:", error);
+    }
+})();

@@ -1,5 +1,7 @@
 # DEMO
 
+:warning: **Warning: This project is for demonstration purposes only and is not production-ready. Microsoft is not responsible for any issues arising from its usage.**
+
 This demo showcases how to implement JWT Auth in Azure Event Grid (MQTT).
 
 The backend can be deployed to Azure App Service as a Docker Container by pushing it to an Azure Container Registry.
@@ -12,14 +14,3 @@ The demo contains 3 main components:
 
 - [`iot-device`](./iot-device/README.md) A IoT device simulation that pushes telemetry data to Azure Event Grid (MQTT).
 
-----------
-
-- [x] Backend HTTP POST /auth/login
-- [x] Demo app login
-- [x] Device login
-- [x] Device publish
-- [x] Backend SSE
-- [x] Backend get telemetry
-- [x] Demo app get telemery
-- [ ] Push image to docker registry
-- [ ] Deploy to app service
